@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>单一需求士气模型</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js"></script>
+</head>
+<body>
+<form action="/t1" method="post">
+<span>周期数:</span><input type="number" name="periods" placeholder="10" value="10" required/><br />
+<span>设备种类:</span><input type="number" name="device" placeholder="4" id="device" required/><br />
+<span>需求类型：&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<label><input name="dtype" type="radio" value="0" />线性增长 </label>
+<label><input name="dtype" type="radio" value="1" />加速增长 </label>
+<label><input name="dtype" type="radio" value="2" />减速增长 </label>
+<label><input name="dtype" type="radio" value="3" />s型1 </label>
+<label><input name="dtype" type="radio" value="4" />s型2 </label>
+<label><input name="dtype" type="radio" value="5" />先升后降 </label>
+<label><input name="dtype" type="radio" value="6" />先降后升 </label>
+<label><input name="dtype" type="radio" value="7" />1期交替 </label>
+<label><input name="dtype" type="radio" value="8" />2期交替 </label>
+<label><input name="dtype" type="radio" value="9" />随机模型 </label><br />
+<span>折现率:</span><input type="number" name="discount" placeholder="0.93" value="0.93" required/><br />
+<span>招聘技术折扣:</span><input type="number" name="hdiscount" placeholder="0.9" value="0.9" required/><br />
+<span>空闲工资率:</span><input type="number" name="sdiscount" placeholder="0.5" value="0.5" required/><br />
+<div id="buy_mechine_cost"></div><br />
+<div id="discard_mechine_cost"></div><br />
+<div id="device_force"></div><br />
+<div id="hire_cost"></div><br />
+<div id="hire_salary_cost"></div><br />
+<div id="fire_cost"></div><br />
+<div id="train_cost"></div><br />
+<div id="train_time"></div><br />
+<div id="assign_cost"></div><br /><br /><br />
+
+<div id="buy_mechine_cost1"></div><br />
+<div id="discard_mechine_cost1"></div><br />
+<div id="device_force1"></div><br />
+<div id="hire_cost1"></div><br />
+<div id="hire_salary_cost1"></div><br />
+<div id="fire_cost1"></div><br />
+<div id="train_cost1"></div><br />
+<div id="train_time1"></div><br />
+<div id="assign_cost1"></div><br />
+
+<input type="button" id="random" value="随机参数"/>
+<input type="submit" id="submit" value="开始计算" />
+</form>
+<script type=text/javascript>
+  $(function() {
+    $('#device').bind('change', function() {
+
+        var count = $('#device').val();
+        var html_str='<span>请输入设备购买成本：</span>';
+        var html_str1='<span>请输入设备购买成本：</span>';
+        for(var i=1;i<=count;i++) {
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="mcost' + i + '" id="mcost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1mcost' + i + '" id="1mcost' + i + '" required />'
+        }
+        $('#buy_mechine_cost').html(html_str);
+        $('#buy_mechine_cost1').html(html_str1);
+
+        html_str='<span>请输入设备抛弃成本：</span>';
+        html_str1='<span>请输入设备抛弃成本：</span>';
+        for(i=1;i<=count;i++) {
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="dmcost' + i + '" id="dmcost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1dmcost' + i + '" id="1dmcost' + i + '" required />'
+        }
+        $('#discard_mechine_cost').html(html_str);
+        $('#discard_mechine_cost1').html(html_str1);
+
+        html_str='<span>请输入设备能力：</span>';
+        html_str1='<span>请输入设备能力：</span>';
+        for(i=1;i<=count;i++) {
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="dforce' + i + '" id="dforce' + i + '"  required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1dforce' + i + '" id="1dforce' + i + '"  required />'
+        }
+        $('#device_force').html(html_str);
+        $('#device_force1').html(html_str1);
+
+        html_str='<span>请输入人员招聘成本</span>';
+        html_str1='<span>请输入人员招聘成本</span>';
+        for(i=0;i<=count;i++){
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="hcost' + i + '" id="hcost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1hcost' + i + '" id="1hcost' + i + '" required />'
+        }
+        $('#hire_cost').html(html_str);
+        $('#hire_cost1').html(html_str1);
+
+        html_str='<span>请输入人员招聘工资成本</span>';
+        html_str1='<span>请输入人员招聘工资成本</span>';
+        for(i=0;i<=count;i++){
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="hscost' + i + '" id="hscost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1hscost' + i + '" id="1hscost' + i + '" required />'
+        }
+        $('#hire_salary_cost').html(html_str);
+        $('#hire_salary_cost1').html(html_str1);
+
+        html_str='<span>请输入人员解聘成本</span>';
+        html_str1='<span>请输入人员解聘成本</span>';
+        for(i=0;i<=count;i++){
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="fcost' + i + '" id="fcost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1fcost' + i + '" id="1fcost' + i + '" required />'
+        }
+        $('#fire_cost').html(html_str);
+        $('#fire_cost1').html(html_str1);
+
+        html_str='<span>请输入人员培训成本</span>';
+        html_str1='<span>请输入人员培训成本</span>';
+        for(i=1;i<=count;i++){
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="tcost' + i + '" id="tcost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1tcost' + i + '" id="1tcost' + i + '" required />'
+        }
+        $('#train_cost').html(html_str);
+        $('#train_cost1').html(html_str1);
+
+        html_str='<span>请输入人员培训时间</span>';
+        html_str1='<span>请输入人员培训时间</span>';
+        for(i=1;i<=count;i++){
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="ttime' + i + '" id="ttime' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1ttime' + i + '" id="1ttime' + i + '" required />'
+        }
+        $('#train_time').html(html_str);
+        $('#train_time1').html(html_str1);
+
+        html_str='<span>请输入人员指派成本</span>';
+        html_str1='<span>请输入人员指派成本</span>';
+        for(i=1;i<=count;i++){
+            html_str = html_str + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="acost' + i + '" id="acost' + i + '" required />'
+            html_str1 = html_str1 + '&nbsp;&nbsp;&nbsp;&nbsp;<span>第' + i + '种:</span><input type="number" name="1acost' + i + '" id="1acost' + i + '" required />'
+        }
+        $('#assign_cost').html(html_str);
+        $('#assign_cost1').html(html_str1);
+    });
+    $('#random').bind('click',function(){
+
+        var count = parseInt($('#device').val());
+
+        var cost = 100;
+        var step = (600-100)/count;
+        for(i=1;i<=count;i++) {
+            cost += parseInt(Math.random()*step);
+            $("#mcost"+i).val(cost);
+            $("#1mcost"+i).val(cost);
+        }
+        cost = 10;
+        step = (20-10) / count;
+        for(i=1;i<=count;i++) {
+            cost += parseInt(Math.random()*step);
+            $("#dmcost"+i).val(cost);
+            $("#1dmcost"+i).val(cost);
+        }
+
+        cost = 200;
+        step = (1000-200) / count;
+        for(i=1;i<=count;i++) {
+            cost += parseInt(Math.random()*step);
+            $("#dforce"+i).val(cost);
+            $("#1dforce"+i).val(cost);
+        }
+
+        cost = 500;
+        step = (2000-500) / (count+1);
+        for(i=0;i<=count;i++){
+            cost += parseInt(Math.random()*step);
+            $("#hcost"+i).val(cost);
+            $("#1hcost"+i).val(cost);
+        }
+
+        cost = 200;
+        step = (500-200) / (count+1);
+        for(i=0;i<=count;i++){
+            cost += parseInt(Math.random()*step);
+            $("#fcost"+i).val(cost);
+            $("#1fcost"+i).val(cost);
+        }
+
+        cost = 200;
+        step = (300-200) / (count+1);
+        for(i=0;i<=count;i++){
+            cost += parseInt(Math.random()*step);
+
+            $("#hscost"+i).val(cost);
+            $("#1hscost"+i).val(cost);
+        }
+
+
+
+        cost=10;
+        step = (500-10)/count;
+        for(i=1;i<=count;i++){
+            cost += parseInt(Math.random()*step);
+            $("#tcost"+i).val(cost);
+            $("#1tcost"+i).val(cost);
+        }
+
+        cost=0;
+        step = (2)/count;
+        for(i=1;i<=count;i++){
+            cost += parseInt(Math.random()*step);
+            $("#ttime"+i).val(cost);
+            $("#1ttime"+i).val(cost);
+        }
+
+        for(var i=1;i<=count;i++){
+            $("#acost"+i).val(50);
+            $("#1acost"+i).val(50);
+
+        }
+
+    });
+  });
+</script>
+</body>
+</html>
